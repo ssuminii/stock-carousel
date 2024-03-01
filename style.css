@@ -1,0 +1,209 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    background-color: black;
+}
+
+button:focus,
+button:active,
+input:focus,
+input:active,
+textarea:focus,
+textarea:active {
+    outline: none;
+    box-shadow: none;
+}
+
+ul,
+ol,
+li {
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+/* Main Page Stock Carousel */
+#stocks {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 2em;
+}
+
+.carousel-wrapper {
+    position: relative;
+    display: flex;
+    overflow: hiddem;
+    overflow-x: scroll;
+    scrollbar-width: none;
+}
+
+#carousel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px; 
+    width: fit-content;
+    animation: carouselAnimation 4000s infinite;
+}
+
+a {
+    display: flex;
+    flex-wrap: wrap;
+    color: inherit;
+    text-decoration: none;
+    background-color: #fff;
+    width: 450px;
+    height: 160px;
+    border-radius: 10px;
+    padding: 15px;
+    margin-right: 10px;
+}
+
+@keyframes carouselAnimation {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-100%); }
+    40% { transform: translateX(-200%); }
+    60% { transform: translateX(-300%); }
+    80% { transform: translateX(-300%); }
+    100% { transform: translateX(0); }
+    101% { transform: translateX(0); }
+}
+
+.stock-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-right: 10px;
+}
+
+.stock-market {
+    font-size: 12px;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.stock-title {
+    margin-bottom: 6px;
+}
+
+.fluctuation-rate {
+    color: #097df3;
+    font-size: 14px;
+    line-height: 18px;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.stock-date {
+    color: gray;
+    font-size: 12px;
+}
+
+
+/* Carousel Graph */
+.stock-graph {
+    width: 48%;
+    height: auto;
+}
+
+.stock-chart {
+    display: block;
+    width: 100%;
+}
+
+/* Detail Page */
+.detail-stock {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: #fff;
+    margin: 2em;
+    margin-bottom: 10px;
+    padding: 20px;
+}
+
+.detail-stock-info .stock-market {
+    font-size: 16px;
+}
+
+.detail-all {
+    width: 100%;
+    background-color: #fff;
+    margin: 2em;
+    padding: 20px;
+    margin-top: 0;
+}
+
+.detail-all strong {
+    display: block;
+    font-size: 22px;
+    text-align: center;
+    width: 100%;
+    border-bottom: gray solid 1.5px;
+    padding: 5px;
+    margin-bottom: 20px;
+}
+
+.detail-list {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0;
+}
+
+.detail-list div dl div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 500px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-bottom: lightgray solid 1px;
+}
+
+.detail-list div dl div dt {
+    color: gray;
+    font-weight: normal;
+}
+
+.detail-list div dl {
+    font-weight: bold;
+}
+
+.detail-list div:first-child dl {
+    color: #097df3;
+}
+
+/*  ≧ 768px (Desktop) */
+@media screen and (max-width: 768px) {
+    a {
+        width: 200px;
+    }
+
+    .stock-graph,
+    .stock-chart {
+        display: none;
+    }
+
+    h1 {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+}
