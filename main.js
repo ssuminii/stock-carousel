@@ -1,13 +1,10 @@
-const API_KEY = `2r0uWdZQtrPmhz0X6LdIUJCI9oierX%2FHiSG2judZYpMdbDlewh%2BeiUKqFIz9%2BGFItTlAr7OIczip2DbaDybkRQ%3D%3D`;
+const API_KEY = config.API_KEY;
+
 let stocksTotalList = [];
-let stocksGraphList = [];
-let stocksGraphList2 = [];
-let stocksDetailList = [];
 let stockPrices = [];
 let stockItems = [];
 
 const stockTotalUrl = new URL(`https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&pageNo=1&numOfRows=50`);
-let stockGraphUrl = new URL(`https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&pageNo=1&numOfRows=50&beginBasDt=20240101`);
 
 const getStock = async (urlStr) => {
   const url = new URL(urlStr);
@@ -16,15 +13,12 @@ const getStock = async (urlStr) => {
   return data.response.body.items.item;
 }
 
-function createURL(name){
-  return `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&itmsNm=${name}&beginBasDt=20240101`;
-}
-
+// 종목명 name 받아와서 url 생성
 function setStockGraphUrl(name){
   return `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&pageNo=1&numOfRows=50&beginBasDt=20240101&itmsNm=${name}`;
 }
 
-
+// 주식 Render
 const stockRender = async () => {
   let stocksHTML = stocksTotalList.map(async (stocks) => {
     const date = `${stocks.basDt}`;
@@ -40,7 +34,7 @@ const stockRender = async () => {
 
     const itemName = stocks.itmsNm;
     const stockGraphUrl = setStockGraphUrl(itemName);
-
+    
     stockItems = await getStock(stockGraphUrl);
     let timestampList = [];
     let priceList = [];
@@ -79,6 +73,7 @@ const stockRender = async () => {
   stocksHTML = await Promise.all(stocksHTML);
   document.getElementById('carousel').innerHTML = stocksHTML.join('');
 
+  // 주식 그래프
   stockPrices.forEach((stock) => {
     const chartData = {
       labels: stock.timestampList,
@@ -128,7 +123,6 @@ const stockRender = async () => {
     });
   });
 };
-
 
 const fetchData = async () => {
   stocksTotalList = await getStock(stockTotalUrl);
