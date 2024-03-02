@@ -1,8 +1,10 @@
 const API_KEY = `2r0uWdZQtrPmhz0X6LdIUJCI9oierX%2FHiSG2judZYpMdbDlewh%2BeiUKqFIz9%2BGFItTlAr7OIczip2DbaDybkRQ%3D%3D`;
 let stocksTotalList = [];
 let stocksGraphList = [];
+let stocksGraphList2 = [];
 let stocksDetailList = [];
 let stockPrices = [];
+let stockItems = [];
 
 const stockTotalUrl = new URL(`https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&pageNo=1&numOfRows=50`);
 let stockGraphUrl = new URL(`https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&pageNo=1&numOfRows=50&beginBasDt=20240101`);
@@ -11,79 +13,79 @@ const getStock = async (urlStr) => {
   const url = new URL(urlStr);
   const response = await fetch(url);
   const data = await response.json();
-
   return data.response.body.items.item;
 }
 
 function createURL(name){
-  
   return `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&itmsNm=${name}&beginBasDt=20240101`;
 }
 
-const stockRender = () => {
-  let stocksHTML = stocksTotalList.map((stocks) => {
-    
-      const date = `${stocks.basDt}`;
-      const formattedDate = `${date.substr(4, 2)}.${date.substr(6, 2)}`;
+function setStockGraphUrl(name){
+  return `https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=${API_KEY}&resultType=json&pageNo=1&numOfRows=50&beginBasDt=20240101&itmsNm=${name}`;
+}
 
-      let fltRtColor = '';
-      if (stocks.fltRt > 0) {
-        fltRtColor = 'red';
-        stocks.fltRt = `+${stocks.fltRt}`;
-      } else if (stocks.fltRt == 0) {
-        fltRtColor = 'gray';
-      }
 
-      
-        const price = stocks.mkp;
-        const timestamp = stocks.basDt;
-        const itemName = stocks.itmsNm;
+const stockRender = async () => {
+  let stocksHTML = stocksTotalList.map(async (stocks) => {
+    const date = `${stocks.basDt}`;
+    const formattedDate = `${date.substr(4, 2)}.${date.substr(6, 2)}`;
 
-        stocksGraphList.push(getStock(stockGraphUrl+'&itmsNm'+itemName));
-  
-        stockPrices.push({ price, timestamp, itemName});
-        
+    let fltRtColor = '';
+    if (stocks.fltRt > 0) {
+      fltRtColor = 'red';
+      stocks.fltRt = `+${stocks.fltRt}`;
+    } else if (stocks.fltRt == 0) {
+      fltRtColor = 'gray';
+    }
 
-      return `          
-      <a href="stock-detail.html?stockName=${itemName}">
-      <div class="stock-info">
-      <div class="stock-market">
-      <strong>${stocks.mrktCtg}</strong>
-      </div>
-      <div class="stock-title">
-      <span>${itemName}</span>
-      </div>
-      
-      <div class="stock-price">
-      <h1>${Number(stocks.mrktTotAmt).toLocaleString('ko-KR')}</h1>
-      </div>
-      
-      <div class="fluctuation-rate">
-      <span style="color: ${fltRtColor};">${stocks.fltRt}%</span>
-      </div>
-      
-      <div class="stock-date">
-      ${formattedDate}
-      </div>
-      </div>
+    const itemName = stocks.itmsNm;
+    const stockGraphUrl = setStockGraphUrl(itemName);
 
-      <div id="stock-graph-${stocks.itmsNm.replace(/\s/g,'')}" class="stock-graph">
-        <canvas id="stock-chart-${stocks.itmsNm.replace(/\s/g,'')}" class="stock-chart"></canvas>
-      </div>
+    stockItems = await getStock(stockGraphUrl);
+    let timestampList = [];
+    let priceList = [];
+    stockItems.map((s) => {
+      timestampList.push(`${s.basDt}`);
+      priceList.push(Number(`${s.mkp}`));
+    });
+
+    stockPrices.push({ itemName, priceList, timestampList });
+
+    return `
+      <a href=#>
+        <div class="stock-info">
+          <div class="stock-market">
+            <strong>${stocks.mrktCtg}</strong>
+          </div>
+          <div class="stock-title">
+            <span>${itemName}</span>
+          </div>
+          <div class="stock-price">
+            <h1>${Number(stocks.mrktTotAmt).toLocaleString('ko-KR')}</h1>
+          </div>
+          <div class="fluctuation-rate">
+            <span style="color: ${fltRtColor};">${stocks.fltRt}%</span>
+          </div>
+          <div class="stock-date">
+            ${formattedDate}
+          </div>
+        </div>
+        <div id="stock-graph-${stocks.itmsNm.replace(/\s/g, '')}" class="stock-graph">
+          <canvas id="stock-chart-${stocks.itmsNm.replace(/\s/g, '')}" class="stock-chart"></canvas>
+        </div>
       </a>`;
-    }).join('');
+  });
 
-  document.getElementById('carousel').innerHTML = stocksHTML;
+  stocksHTML = await Promise.all(stocksHTML);
+  document.getElementById('carousel').innerHTML = stocksHTML.join('');
 
-
-  stocksGraphList.forEach((stock) => {
-
+  stockPrices.forEach((stock) => {
     const chartData = {
-      labels: stockPrices.map((stock) => Number(stock.timestamp)),
+      labels: stock.timestampList,
       datasets: [
         {
           label: 'stock-price',
-          data: stockPrices.map((stock) => Number(stock.price)),
+          data: stock.priceList,
           borderWidth: 1.5,
           pointRadius: 0,
         },
@@ -118,7 +120,7 @@ const stockRender = () => {
       },
     };
 
-    const ctx = document.getElementById(`stock-chart-${stock.itmsNm.replace(/\s/g, '')}`).getContext('2d');
+    const ctx = document.getElementById(`stock-chart-${stock.itemName.replace(/\s/g, '')}`).getContext('2d');
     new Chart(ctx, {
       type: 'line',
       data: chartData,
@@ -127,10 +129,9 @@ const stockRender = () => {
   });
 };
 
+
 const fetchData = async () => {
   stocksTotalList = await getStock(stockTotalUrl);
-  stocksGraphList = await getStock(stockGraphUrl);
-
   stockRender();
 };
 
